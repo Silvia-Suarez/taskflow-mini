@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import { Link } from "react-router-dom";
 function TaskList() {
   // Estado: lista de tareas
   const [tareas, setTareas] = useState([]);
@@ -11,9 +11,10 @@ function TaskList() {
 
   // HAGAMOS EL EJEMPLO DE BUSCAR TAREAS CON UN SEARCH BAR
   const [search, setSearch] = useState("");
-  const filteredTareas = tareas.filter((tarea) =>
-    tarea.title.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filteredTareas = tareas
+    .filter((tarea) => tarea.title.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => b.id - a.id) // Ordenar por id de manera descendente
+    .sort((a, b) => a.completed - b.completed); // Ordenar por completed de manera ascendente
 
   useEffect(() => {
     async function cargarTareas() {
@@ -75,9 +76,7 @@ function TaskList() {
   // Función para alternar completada
   function toggleCompletada(id) {
     setTareas(
-      tareas.map((t) =>
-        t.id === id ? { ...t, completed: !t.completed } : t,
-      ),
+      tareas.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)),
     );
   }
 
@@ -126,9 +125,7 @@ function TaskList() {
                 checked={tarea.completed}
                 onChange={() => toggleCompletada(tarea.id)}
               />
-              <span className={tarea.completed ? "completada" : ""}>
-                {tarea.title}
-              </span>
+              <Link to={`/task/${tarea.id}`}>{tarea.title}</Link>
               <button
                 className="delete-button"
                 onClick={() => eliminarTarea(tarea.id)}
