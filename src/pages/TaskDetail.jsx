@@ -1,49 +1,89 @@
-import { useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
-import { useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import NavBar from "../components/NavBar";
+import Card from "../components/Card";
+import Badge from "../components/Badge";
+import { PiArrowLeftLight } from "react-icons/pi";
+
 function TaskDetail() {
   const { id } = useParams();
-  const [task, setTask] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [tarea, setTarea] = useState(null);
+  const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function getTask() {
+    async function cargarTarea() {
       try {
-        setLoading(true);
+        setCargando(true);
+        setError(null);
         const response = await fetch(
           `https://jsonplaceholder.typicode.com/todos/${id}`,
         );
-        if (!response.ok) {
-          throw new Error("Failed to fetch task");
-        }
+        if (!response.ok) throw new Error("Tarea no encontrada");
         const data = await response.json();
-        setTask(data);
-      } catch (e) {
-        setError(e.message);
+        setTarea(data);
+      } catch (error) {
+        setError(error.message);
       } finally {
-        setLoading(false);
+        setCargando(false);
       }
     }
-    getTask();
+    cargarTarea();
   }, [id]);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!task) return <div>Task not found</div>;
   return (
-    <>
-      <div className="page">
-        <h1> DETALLE DE LA TAREA</h1>
-        <div>
-          <h2>Contenido de la tarea: {task.title}</h2>
-          <p> ID: {task.id}</p>
-          <p> Completada: {task.completed ? "Si" : "No"}</p>
-          <p> Usuario: {task.userId}</p>
-          <Link to="/">Volver a la lista de tareas</Link>
-        </div>
+    <div className="min-h-screen bg-app-bg transition-colors duration-300">
+      <NavBar />
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold text-app-text mb-6">
+          Detalle de la tarea
+        </h1>
+        <Card className="p-6 max-w-lg">
+          {cargando && <p className="text-app-muted">Cargando tarea...</p>}
+          {error && (
+            <>
+              <p className="text-red-300 dark:text-red-700 my-5">Error: {error}</p>
+              <Link
+                to="/"
+                className="inline-flex items-center gap-2 text-purple-accent hover:underline font-semibold"
+              >
+                <PiArrowLeftLight /> Volver a la lista
+              </Link>
+            </>
+          )}
+          {tarea && (
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold text-app-text">
+                {tarea.title}
+              </h2>
+              <div className="space-y-2 text-app-muted">
+                <p>
+                  <span className="font-semibold text-app-text">ID:</span>{" "}
+                  {tarea.id}
+                </p>
+                <p>
+                  <span className="font-semibold text-app-text">Estado:</span>{" "}
+                  <Badge variant={tarea.completed ? "green" : "gray"}>
+                    {tarea.completed ? "Completada" : "Pendiente"}
+                  </Badge>
+                </p>
+                <p>
+                  <span className="font-semibold text-app-text">Usuario:</span>{" "}
+                  {tarea.userId}
+                </p>
+              </div>
+              <Link
+                to="/"
+                className="inline-flex items-center gap-2 text-purple-accent hover:underline font-semibold"
+              >
+                <PiArrowLeftLight /> Volver a la lista
+              </Link>
+            </div>
+          )}
+        </Card>
       </div>
-    </>
+    </div>
   );
 }
+
 export default TaskDetail;

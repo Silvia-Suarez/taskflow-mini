@@ -1,29 +1,94 @@
 @import "tailwindcss";
 
+/* Allows toggling dark mode manually by adding a .dark class to your <html> tag */
 @custom-variant dark (&:where(.dark, .dark *));
-@theme {
-  --color-backgroung-primary-color: #d76dc5;
-  --color-background-primary-color-50: #f8f9fa;
-  --color-background-primary-color-100: #e9ecef;
-  --color-background-primary-color-200: #dee2e6;
-  --color-background-primary-color-300: #ced4da;
-  --color-background-primary-color-400: #adb5bd;
-  --color-background-primary-color-500: #6c757d;
-  --color-background-primary-color-600: #495057;
-  --color-background-primary-color-700: #343a40;
-  --color-background-primary-color-800: #212529;
-  --color-background-primary-color-900: #000000;
-  --shadow-input-primary: 0 0 10px 0 rgba(0, 0, 0, 0.1);
-  --radius-input: 12px;
-  --radius-button: 24px;
-}
 
+@theme {
+  /* 
+   * Brand Colors
+   */
+  --color-pink-soft: #fce7f3;
+  --color-purple-soft: #f3e8ff;
+  --color-blue-soft: #e0f2fe;
+
+  /* 
+   * Accent Colors (Perfect for text, borders, and icons inside the pills)
+   */
+  --color-pink-accent: #ec4899;
+  --color-purple-accent: #a855f7;
+  --color-blue-accent: #3b82f6;
+
+  /* 
+   * Semantic UI Core Colors
+   */
+  --color-app-bg: #f8fafc;
+  --color-app-surface: #ffffff;
+  --color-app-text: #1e293b;
+  --color-app-muted: #64748b;
+  --color-app-border: #e2e8f0;
+
+  /* 
+   * RADIUS
+   */
+  --radius-card: 1rem; /* rounded-card */
+  --radius-pill: 9999px; /* rounded-pill */
+  --radius-button: 0.75rem; /* rounded-button */
+
+  /* 
+    * SHADOWS
+    */
+  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.05); /* shadow-card */
+  --shadow-card-hover: 0 8px 30px -4px rgba(0, 0, 0, 0.08); /* shadow-card-hover */
+
+  /* 
+    * INSET SHADOWS
+    */
+  --inset-shadow-pressed: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05); /* inset-shadow-pressed */
+
+  /* 
+    * EASING
+    */
+  --ease-spring: cubic-bezier(0.4, 0, 0.2, 1); /* ease-spring */
+
+  /* 
+    * ANIMATION
+    */
+  --animate-task-complete: scale-down 0.2s ease-out forwards;
+}
+/* 
+ * Dark Mode Overrides 
+ * Redefining variables here means they swap automatically in dark mode!
+ */
+.dark {
+  /* Core UI switches to dark */
+  --color-app-bg: #0f172a;
+  --color-app-surface: #1e293b;
+  --color-app-text: #f8fafc;
+  --color-app-muted: #94a3b8;
+  --color-app-border: #334155;
+
+  /* Deepened soft colors to act as backgrounds without being painfully bright */
+  --color-pink-soft: #500724;
+  --color-purple-soft: #3b0764;
+  --color-blue-soft: #172554;
+
+  /* Lightened accents to maintain text contrast against the new dark backgrounds */
+  --color-pink-accent: #fbcfe8;
+  --color-purple-accent: #e9d5ff;
+  --color-blue-accent: #bfdbfe;
+
+  /* Redefine shadows for dark mode so they actually show up against dark backgrounds */
+  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 8px 30px -4px rgba(0, 0, 0, 0.5);
+  --inset-shadow-pressed: inset 0 2px 4px 0 rgba(0, 0, 0, 0.4);
+}
 * {
   box-sizing: border-box;
 }
-/* body { */
-    /* font-family: 'Segoe UI', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
-    background: #ffefef;
-    margin: 0; */
-    /* padding: 20px; */
-/* } */
+
+/* Keyframes for the custom animation */
+@keyframes scale-down {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.95); opacity: 0.8; }
+  100% { transform: scale(0.9); opacity: 0.5; }
+}

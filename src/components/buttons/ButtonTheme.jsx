@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { ThemeContext } from "../context/ThemeContext.jsx";
+import { ThemeContext } from "../../context/ThemeContext.jsx";
 import { PiSunDimLight, PiMoonLight } from "react-icons/pi";
 
 function ButtonTheme() {

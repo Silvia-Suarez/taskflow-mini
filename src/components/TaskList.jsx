@@ -1,8 +1,26 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { PiPlusCircleLight } from "react-icons/pi";
+import {
+  PiPlusCircleLight,
+  PiArrowClockwiseLight,
+  PiTrashLight,
+  PiEyeLight,
+  PiCheckCircleLight,
+  PiCircleLight,
+  PiSpinnerLight,
+} from "react-icons/pi";
+import Card from "./Card";
+import Badge from "./Badge";
+import {
+  Button,
+  SuccessButton,
+  ErrorButton,
+  WarningButton,
+  NeutralButton,
+} from "./buttons/Buttons";
+import Input from "./inputs/Input";
 import SearchInput from "./inputs/SearchInput";
-import { NeutraButton } from "./Buttons";
+
 function TaskList() {
   // Estado: lista de tareas
   const [tareas, setTareas] = useState([]);
@@ -19,34 +37,38 @@ function TaskList() {
     .sort((a, b) => b.id - a.id) // Ordenar por id de manera descendente
     .sort((a, b) => a.completed - b.completed); // Ordenar por completed de manera ascendente
 
-  useEffect(() => {
-    async function cargarTareas() {
-      try {
-        setLoading(true);
-        setError(null);
+  async function cargarTareas() {
+    try {
+      setLoading(true);
+      setError(null);
 
-        const response = await fetch(
-          "https://jsonplaceholder.typicode.com/todos",
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error: ${response.status}`);
-        }
-        const data = await response.json();
-        setTareas(data);
-      } catch (e) {
-        setError(e.message);
-        console.error("error", e);
-      } finally {
-        setLoading(false);
+      const response = await fetch(
+        "https://jsonplaceholder.typicode.com/todos",
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
       }
+      const data = await response.json();
+      setTareas(data);
+    } catch (e) {
+      setError(e.message);
+      console.error("error", e);
+    } finally {
+      setLoading(false);
     }
+  }
 
+  useEffect(() => {
     const guardadas = localStorage.getItem("tareas");
     if (guardadas) {
-      setTareas(JSON.parse(guardadas));
-      setLoading(false);
+      setTimeout(() => {
+        setTareas(JSON.parse(guardadas));
+        setLoading(false);
+      }, 5000);
     } else {
-      cargarTareas();
+      setTimeout(() => {
+        cargarTareas();
+      }, 5000);
     }
   }, []);
 
@@ -70,12 +92,21 @@ function TaskList() {
     setTareas([...tareas, nueva]);
     setNuevaTarea("");
   }
-
+  // Función para intentar nuevamente desde la API
+  async function tryAgainFromApi() {
+    await cargarTareas();
+  }
+  // Función para eliminar todas las tareas
+  function eliminarTodas() {
+    if (confirm("¿Eliminar todas las tareas?")) {
+      setTareas([]);
+      localStorage.removeItem("tareas");
+    }
+  }
   // Función para eliminar tarea
   function eliminarTarea(id) {
     setTareas(tareas.filter((t) => t.id !== id));
   }
-
   // Función para alternar completada
   function toggleCompletada(id) {
     setTareas(
@@ -84,57 +115,108 @@ function TaskList() {
   }
 
   return (
-    <div className=" m-2 max-w-1/2 mx-auto flex flex-col gap-4 bg-background-primary-color-100 dark:bg-background-primary-color-900 p-4 rounded-input dark:text-white">
-      <h1>Mis Tareas</h1>
-      <SearchInput placeholder={"Buscar Tarea..."} value={search} onChange={(e) =>setSearch(e.target.value)}/>
-      {loading && <p className="loading-text">Cargando tareas...</p>}
-      {error && (
-        <p>
-          ERROR: Surgio algo inesperado
-          <br /> <span style={{ color: "red" }}></span>
-          {error}
+    <Card className="max-w-2xl mx-auto p-6">
+      <h1 className="text-3xl font-bold text-center mb-6 text-app-text">
+        Mis Tareas
+      </h1>
+      <div className="mb-4">
+        <SearchInput
+          placeholder={"Buscar Tarea..."}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+      {loading && (
+        <p className="text-center text-app-muted py-4 flex">
+          <PiSpinnerLight className="animate-spin text-center text-3xl mx-auto" />
         </p>
       )}
+      {error && (
+        <div className="bg-red-200 dark:bg-red-700 p-4 rounded-input text-center text-app-text">
+          <p className="text-lg font-bold">ERROR: Surgio algo inesperado</p>
+          <p className="text-sm">{error}</p>
+        </div>
+      )}
 
-      <form onSubmit={agregarTarea}>
-        <input
+      <form onSubmit={agregarTarea} className="flex items-center gap-2 my-4">
+        {/* <input
           name="nuevaTarea"
           type="text"
           value={nuevaTarea}
           className="w-auto rounded-input p-4  bg-white border border-b-gray-200"
           onChange={(e) => setNuevaTarea(e.target.value)}
           placeholder="Nueva tarea..."
+        /> */}
+        <Input
+          type="text"
+          placeholder="Nueva tarea..."
+          value={nuevaTarea}
+          onChange={(e) => setNuevaTarea(e.target.value)}
+          disabled={loading}
+          className="flex-1"
         />
-        <button className="main-button" type="submit">
-          <PiPlusCircleLight className="dark:text-white text-background-primary-color-600  text-2xl" />
-        </button>
+        <Button type="submit" disabled={loading} icon={PiPlusCircleLight} />
       </form>
-
-      <ul>
+      <div className="flex flex-wrap gap-2 mb-4">
+        <NeutralButton
+          onClick={tryAgainFromApi}
+          disabled={loading}
+          icon={PiArrowClockwiseLight}
+        ></NeutralButton>
+        <ErrorButton onClick={eliminarTodas} icon={PiTrashLight}>
+          Eliminar todas
+        </ErrorButton>
+      </div>
+      <ul className="space-y-2">
         {filteredTareas.length === 0 && !loading ? (
           <p>No hay tareas. ¡Agrega una!</p>
         ) : (
           filteredTareas.map((tarea) => (
-            <li key={tarea.id}>
-              <input
-                type="checkbox"
-                checked={tarea.completed}
-                onChange={() => toggleCompletada(tarea.id)}
-              />
-              <Link to={`/task/${tarea.id}`}>{tarea.title}</Link>
+            <li
+              key={tarea.id}
+              className="flex items-center gap-3 p-3 bg-app-bg rounded-card border border-app-border transition-colors duration-200"
+            >
               <button
-                className="delete-button"
-                onClick={() => eliminarTarea(tarea.id)}
+                onClick={() => toggleCompletada(tarea.id)}
+                className="text-2xl cursor-pointer hover:scale-110 transition-transform"
+                aria-label={
+                  tarea.completed
+                    ? "Marcar como pendiente"
+                    : "Marcar como completada"
+                }
               >
-                Eliminar
+                {tarea.completed ? (
+                  <PiCheckCircleLight className="text-green-500" />
+                ) : (
+                  <PiCircleLight className="text-app-muted" />
+                )}
               </button>
+              <span
+                className={`flex-1 text-app-text ${tarea.completed ? "line-through text-app-muted" : ""}`}
+              >
+                {tarea.title}
+              </span>
+              <div className="flex gap-2">
+                <Link
+                  to={`/task/${tarea.id}`}
+                  className="bg-purple-accent hover:bg-purple-600 text-white px-3 py-1 rounded-button text-sm transition-colors duration-200 flex items-center gap-1"
+                >
+                  <PiEyeLight className="text-xs" /> Ver
+                </Link>
+                <button
+                  onClick={() => eliminarTarea(tarea.id)}
+                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-button text-sm transition-colors duration-200 flex items-center gap-1"
+                >
+                  <PiTrashLight className="text-xs" />
+                </button>
+              </div>
             </li>
           ))
         )}
       </ul>
 
       <p>Total: {filteredTareas.length} tareas</p>
-    </div>
+    </Card>
   );
 }
 
