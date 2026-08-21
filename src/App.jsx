@@ -15,7 +15,7 @@ Que una sola pagina reneriza diversos componentes, sin recargas.
 function App() {
   const { theme } = useContext(ThemeContext);
   return (
-    <div className={`app-${theme}`}>
+    <div className={`${theme === "dark" ? "dark": ""}`}>
       <Routes>
         <Route path="/" element={<Home />}></Route>
         <Route path="/about" element={<About />}></Route>

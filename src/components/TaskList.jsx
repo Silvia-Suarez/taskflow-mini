@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { PiPlusCircleLight } from "react-icons/pi";
+import SearchInput from "./inputs/SearchInput";
+import { NeutraButton } from "./Buttons";
 function TaskList() {
   // Estado: lista de tareas
   const [tareas, setTareas] = useState([]);
@@ -81,17 +84,9 @@ function TaskList() {
   }
 
   return (
-    <div className="task-list">
+    <div className=" m-2 max-w-1/2 mx-auto flex flex-col gap-4 bg-background-primary-color-100 dark:bg-background-primary-color-900 p-4 rounded-input dark:text-white">
       <h1>Mis Tareas</h1>
-      <input
-        name="search"
-        className="search-input"
-        type="text"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Buscar tarea..."
-      />
-
+      <SearchInput placeholder={"Buscar Tarea..."} value={search} onChange={(e) =>setSearch(e.target.value)}/>
       {loading && <p className="loading-text">Cargando tareas...</p>}
       {error && (
         <p>
@@ -106,11 +101,12 @@ function TaskList() {
           name="nuevaTarea"
           type="text"
           value={nuevaTarea}
+          className="w-auto rounded-input p-4  bg-white border border-b-gray-200"
           onChange={(e) => setNuevaTarea(e.target.value)}
           placeholder="Nueva tarea..."
         />
         <button className="main-button" type="submit">
-          Agregar
+          <PiPlusCircleLight className="dark:text-white text-background-primary-color-600  text-2xl" />
         </button>
       </form>
 
