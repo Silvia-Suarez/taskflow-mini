@@ -4,6 +4,7 @@ import "./index.css";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
+import { AuthContext, AuthProvider } from "./context/AuthContext.jsx";
 
 /* 
 1. Crear el contexto para el tema
@@ -24,9 +25,11 @@ Estado global sin prop drilling.
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
 );

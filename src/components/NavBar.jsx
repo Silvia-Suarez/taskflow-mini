@@ -1,8 +1,20 @@
 import { NavLink } from "react-router-dom";
 import ButtonTheme from "../components/buttons/ButtonTheme";
-import { PiHouse, PiInfo, PiEnvelope } from "react-icons/pi";
+import {
+  PiHouse,
+  PiInfo,
+  PiEnvelope,
+  PiSignIn,
+  PiSignOut,
+  PiUserCircleGearThin,
+} from "react-icons/pi";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 function Navegacion() {
+  const { isAuthenticated, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
   const links = [
     { to: "/", label: "Inicio", icon: <PiHouse className="text-xl" /> },
     { to: "/about", label: "Nosotros", icon: <PiInfo className="text-xl" /> },
@@ -11,6 +23,7 @@ function Navegacion() {
       label: "Contacto",
       icon: <PiEnvelope className="text-xl" />,
     },
+    { to: "/profile", label: "Perfil", icon: <PiUserCircleGearThin className="text-xl" /> },
   ];
 
   const renderLinks = links.map((link) => (
@@ -25,6 +38,14 @@ function Navegacion() {
       {link.icon} {link.label}
     </NavLink>
   ));
+
+  function handleLogout() {
+    window.confirm("¿Estás seguro de querer cerrar sesión?");
+    if (confirm) {
+      logout();
+      navigate("/login");
+    }
+  }
   return (
     <nav
       className={`bg-pink-soft px-6 py-4 flex flex-wrap items-center justify-between gap-4 shadow-card transition-colors duration-300`}
@@ -33,7 +54,18 @@ function Navegacion() {
         TASK FLOW
       </p>
 
-      <div className="mx-auto text-center flex items-center gap-1 flex-wrap">{renderLinks}</div>
+      <div className="mx-auto text-center flex items-center gap-1 flex-wrap">
+        {renderLinks}
+      </div>
+      {isAuthenticated ? (
+        <button className="cursor-pointer" onClick={handleLogout}>
+          <PiSignOut className="text-3xl text-red-500"></PiSignOut>
+        </button>
+      ) : (
+        <NavLink to="/login">
+          <PiSignIn className="text-3xl text-blue-accent"></PiSignIn>
+        </NavLink>
+      )}
       <ButtonTheme />
     </nav>
   );

@@ -43,6 +43,7 @@ import {
           ${sizeClasses} 
           rounded-button 
           font-semibold 
+          cursor-pointer
           transition-all 
           duration-200 
           ease-spring
