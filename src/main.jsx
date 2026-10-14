@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { AuthContext, AuthProvider } from "./context/AuthContext.jsx";
+import { SocketProvider } from "./context/SocketContext.jsx";
 
 /* 
 1. Crear el contexto para el tema
@@ -27,7 +28,9 @@ createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <AuthProvider>
         <ThemeProvider>
-          <App />
+          <SocketProvider>
+            <App />
+          </SocketProvider>
         </ThemeProvider>
       </AuthProvider>
     </BrowserRouter>
