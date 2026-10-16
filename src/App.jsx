@@ -10,6 +10,7 @@ import { useContext } from "react";
 import Login from "./pages/Login.jsx";
 import Profile from "./pages/Profile.jsx";
 import PrivateRoute from "./components/PrivateRouth.jsx";
+import Live from "./pages/Live.jsx";
 /* Existen 2 tipos de aplicativos web
 1. los spa : Single paage application.  **ESTE ES EL QUE USAMOS**
 Que una sola pagina reneriza diversos componentes, sin recargas.
@@ -30,6 +31,7 @@ function App() {
             </PrivateRoute>
           }
         ></Route>
+        <Route path="/live" element={<Live />}></Route>
         <Route path="/about" element={<About />}></Route>
         <Route path="/contact" element={<Contact />}></Route>
         <Route path="/task/:id" element={<TaskDetail />}></Route>
