@@ -4,25 +4,25 @@ import { socket } from "../socket";
 export const SocketContext = createContext();
 
 export function SocketProvider({ children }) {
-  const [conectado, setConectado] = useState(socket.connect);
+  const [conectado, setConectado] = useState(socket.connected);
 
   useEffect(() => {
-    function onConnected() {
+    function onConnect() {
       setConectado(true);
     }
-    function onDisconnected() {
+    function onDisconnect() {
       setConectado(false);
     }
 
-    socket.on("connected", onConnected);
-    socket.on("disconnected", onDisconnected);
+    // Socket.IO built-in events (not custom "connected"/"disconnected")
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
     socket.connect();
 
-    // Limpiar los listeners duplicados
     return () => {
-      socket.off("connected", onConnected);
-      socket.off("disconnected", onDisconnected);
-      socket.disconnected();
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+      socket.disconnect();
     };
   }, []);
 

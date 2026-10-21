@@ -7,6 +7,7 @@ import {
   PiSignIn,
   PiSignOut,
   PiUserCircleGearThin,
+  PiBroadcast,
 } from "react-icons/pi";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
@@ -17,13 +18,22 @@ function Navegacion() {
   const navigate = useNavigate();
   const links = [
     { to: "/", label: "Inicio", icon: <PiHouse className="text-xl" /> },
+    {
+      to: "/live",
+      label: "Live",
+      icon: <PiBroadcast className="text-xl" />,
+    },
     { to: "/about", label: "Nosotros", icon: <PiInfo className="text-xl" /> },
     {
       to: "/contact",
       label: "Contacto",
       icon: <PiEnvelope className="text-xl" />,
     },
-    { to: "/profile", label: "Perfil", icon: <PiUserCircleGearThin className="text-xl" /> },
+    {
+      to: "/profile",
+      label: "Perfil",
+      icon: <PiUserCircleGearThin className="text-xl" />,
+    },
   ];
 
   const renderLinks = links.map((link) => (
@@ -40,8 +50,7 @@ function Navegacion() {
   ));
 
   function handleLogout() {
-    window.confirm("¿Estás seguro de querer cerrar sesión?");
-    if (confirm) {
+    if (window.confirm("¿Estás seguro de querer cerrar sesión?")) {
       logout();
       navigate("/login");
     }

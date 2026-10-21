@@ -10,8 +10,8 @@ export function AuthProvider({ children }) {
     if (savedUser) {
       try {
         setUser(JSON.parse(savedUser));
-      } catch (e) {
-        localStorage.removeItem(user);
+      } catch {
+        localStorage.removeItem("user");
       }
     }
     setLoading(false);

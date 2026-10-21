@@ -4,7 +4,7 @@ import "./index.css";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
-import { AuthContext, AuthProvider } from "./context/AuthContext.jsx";
+import { AuthProvider } from "./context/AuthContext.jsx";
 import { SocketProvider } from "./context/SocketContext.jsx";
 
 /* 

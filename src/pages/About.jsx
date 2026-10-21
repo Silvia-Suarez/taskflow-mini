@@ -21,7 +21,8 @@ function About() {
               <li>Autenticación simulada con Context API</li>
               <li>Tema oscuro/claro</li>
               <li>Consumo de API (JSONPlaceholder)</li>
-              <li>Rutas protegidas (PrivateRoute, AdminRoute)</li>
+              <li>Rutas protegidas (PrivateRoute)</li>
+              <li>Chat en vivo con Socket.IO</li>
               <li>Persistencia con localStorage</li>
               <li>TailwindCSS + React Icons</li>
             </ul>

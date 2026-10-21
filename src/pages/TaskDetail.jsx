@@ -16,14 +16,26 @@ function TaskDetail() {
       try {
         setCargando(true);
         setError(null);
+
+        // Custom tasks (Date.now ids) live in localStorage, not JSONPlaceholder
+        const guardadas = localStorage.getItem("tareas");
+        if (guardadas) {
+          const lista = JSON.parse(guardadas);
+          const local = lista.find((t) => String(t.id) === String(id));
+          if (local) {
+            setTarea(local);
+            return;
+          }
+        }
+
         const response = await fetch(
           `https://jsonplaceholder.typicode.com/todos/${id}`,
         );
         if (!response.ok) throw new Error("Tarea no encontrada");
         const data = await response.json();
         setTarea(data);
-      } catch (error) {
-        setError(error.message);
+      } catch (err) {
+        setError(err.message);
       } finally {
         setCargando(false);
       }
@@ -42,7 +54,9 @@ function TaskDetail() {
           {cargando && <p className="text-app-muted">Cargando tarea...</p>}
           {error && (
             <>
-              <p className="text-red-300 dark:text-red-700 my-5">Error: {error}</p>
+              <p className="text-red-300 dark:text-red-700 my-5">
+                Error: {error}
+              </p>
               <Link
                 to="/"
                 className="inline-flex items-center gap-2 text-purple-accent hover:underline font-semibold"
@@ -67,10 +81,14 @@ function TaskDetail() {
                     {tarea.completed ? "Completada" : "Pendiente"}
                   </Badge>
                 </p>
-                <p>
-                  <span className="font-semibold text-app-text">Usuario:</span>{" "}
-                  {tarea.userId}
-                </p>
+                {tarea.userId != null && (
+                  <p>
+                    <span className="font-semibold text-app-text">
+                      Usuario:
+                    </span>{" "}
+                    {tarea.userId}
+                  </p>
+                )}
               </div>
               <Link
                 to="/"

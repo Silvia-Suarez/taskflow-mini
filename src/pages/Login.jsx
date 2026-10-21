@@ -23,16 +23,20 @@ function Login() {
   function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    setLoad(true);
 
     if (!email || !pass) {
       setError("Por favor, complete los campos obligatorios");
+      setLoad(false);
       return;
     }
     try {
       login(email, pass);
       navigate(from, { replace: true });
-    } catch (e) {
-      setError("Ocurrio un error inesperado al inciar sesión: ", e.message);
+    } catch (err) {
+      setError(
+        `Ocurrió un error inesperado al iniciar sesión: ${err.message}`,
+      );
     } finally {
       setLoad(false);
     }
