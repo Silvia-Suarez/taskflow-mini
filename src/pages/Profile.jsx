@@ -14,7 +14,8 @@ function Profile() {
         <h1 className="text-3xl font-bold text-app-text mb-6">Perfil</h1>
         <Card className="p-6 space-y-3">
           <p className="text-app-text">
-            <span className="font-semibold">Nombre:</span> {user?.name}
+            <span className="font-semibold">Nombre:</span>{" "}
+            {user?.nombre || user?.name}
           </p>
           <p className="text-app-text">
             <span className="font-semibold">Email:</span> {user?.email}

@@ -20,7 +20,7 @@ function Login() {
 
   const from = location.state?.from?.pathname || "/";
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError("");
     setLoad(true);
@@ -31,12 +31,14 @@ function Login() {
       return;
     }
     try {
-      login(email, pass);
+      await login(email, pass);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(
-        `Ocurrió un error inesperado al iniciar sesión: ${err.message}`,
-      );
+      const mensaje =
+        err.response?.data?.error ||
+        err.response?.data?.mensaje ||
+        err.message;
+      setError(`Error al iniciar sesión: ${mensaje}`);
     } finally {
       setLoad(false);
     }
@@ -76,7 +78,7 @@ function Login() {
           </form>
 
           <p className="text-app-muted text-sm text-center">
-            Cualquier email funciona si contiene "admin"✨
+            Usa un usuario registrado en el backend (API en puerto 3001)
           </p>
         </div>
       </div>
