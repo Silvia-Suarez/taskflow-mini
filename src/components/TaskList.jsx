@@ -10,26 +10,31 @@ import {
   PiSpinnerLight,
 } from "react-icons/pi";
 import Card from "./Card";
-import { tareasService } from "../services/tareasService";
-import Badge from "./Badge";
-import {
-  Button,
-  SuccessButton,
-  ErrorButton,
-  WarningButton,
-  NeutralButton,
-} from "./buttons/Buttons";
+import { Button, ErrorButton, NeutralButton } from "./buttons/Buttons";
 import Input from "./inputs/Input";
 import SearchInput from "./inputs/SearchInput";
+import { cargarTareas, setTareas } from "../store/slices/tareasSlice";
 
 function TaskList() {
-  // Estado: lista de tareas
-  const [tareas, setTareas] = useState([]);
+  // // Estado: lista de tareas
+  // const [tareas, setTareas] = useState([]);
+  // // Manejo de estados
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState(null);
+
+  const tareas = useSelector((state = state.tareas.items));
+  const loading = useSelector((state = state.tareas.loading));
+  const error = useSelector((state = state.tareas.error));
+
+  // Dispatcher
+  const dispatch = useDispatch();
+
   // Estado: valor del input
   const [nuevaTarea, setNuevaTarea] = useState("");
-  // Manejo de estados
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    dispatch(cargarTareas());
+  }, [dispatch]);
 
   // HAGAMOS EL EJEMPLO DE BUSCAR TAREAS CON UN SEARCH BAR
   const [search, setSearch] = useState("");
@@ -37,24 +42,6 @@ function TaskList() {
     .filter((tarea) => tarea.title.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => b.id - a.id) // Ordenar por id de manera descendente
     .sort((a, b) => a.completed - b.completed); // Ordenar por completed de manera ascendente
-
-  async function cargarTareas() {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await tareasService.getTareas(user.id);
-      if (!response.ok) {
-        throw new Error(`Error al cargar las tareas: ${response.status}`);
-      }
-      setTareas(response);
-    } catch (e) {
-      setError(`Error al cargar las tareas: ${e.message}`);
-      console.error("error", e);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   useEffect(() => {
     const guardadas = localStorage.getItem("tareas");
@@ -77,17 +64,10 @@ function TaskList() {
   }, [tareas]);
 
   // Función para agregar tarea
-  function agregarTarea(e) {
+  function handleAgregarTarea(e) {
     e.preventDefault();
     if (nuevaTarea.trim() === "") return;
-
-    const nueva = {
-      id: Date.now(),
-      title: nuevaTarea,
-      completed: false,
-    };
-
-    setTareas([...tareas, nueva]);
+    dispatch(crearTarea({ nuevaTarea }));
     setNuevaTarea("");
   }
   // Función para intentar nuevamente desde la API
@@ -103,7 +83,7 @@ function TaskList() {
   }
   // Función para eliminar tarea
   function eliminarTarea(id) {
-    setTareas(tareas.filter((t) => t.id !== id));
+    dispatch(eliminarTarea({ _id: id }));
   }
   // Función para alternar completada
   function toggleCompletada(id) {
@@ -114,16 +94,6 @@ function TaskList() {
 
   return (
     <Card className="max-w-2xl mx-auto p-6">
-      <h1 className="text-3xl font-bold text-center mb-6 text-app-text">
-        Mis Tareas
-      </h1>
-      <div className="mb-4">
-        <SearchInput
-          placeholder={"Buscar Tarea..."}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
       {loading && (
         <p className="text-center text-app-muted py-4 flex">
           <PiSpinnerLight className="animate-spin text-center text-3xl mx-auto" />
@@ -135,8 +105,21 @@ function TaskList() {
           <p className="text-sm">{error}</p>
         </div>
       )}
+      <h1 className="text-3xl font-bold text-center mb-6 text-app-text">
+        Mis Tareas
+      </h1>
+      <div className="mb-4">
+        <SearchInput
+          placeholder={"Buscar Tarea..."}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
 
-      <form onSubmit={agregarTarea} className="flex items-center gap-2 my-4">
+      <form
+        onSubmit={handleAgregarTarea}
+        className="flex items-center gap-2 my-4"
+      >
         {/* <input
           name="nuevaTarea"
           type="text"
