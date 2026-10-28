@@ -1,11 +1,12 @@
-import { useContext } from "react";
+import { useSelector } from "react-redux";
 import NavBar from "../components/NavBar";
 import Card from "../components/Card";
 import Badge from "../components/Badge";
-import { AuthContext } from "../context/AuthContext";
+import { selectIsAdmin, selectUser } from "../store/slices/authSlice";
 
 function Profile() {
-  const { user, isAdmin } = useContext(AuthContext);
+  const user = useSelector(selectUser);
+  const isAdmin = useSelector(selectIsAdmin);
 
   return (
     <div className="min-h-screen bg-app-bg transition-colors duration-300">

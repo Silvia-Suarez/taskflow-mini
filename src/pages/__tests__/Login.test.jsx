@@ -1,38 +1,51 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
+import { Provider } from "react-redux";
+import { configureStore } from "@reduxjs/toolkit";
 import { vi } from "vitest";
 import { ThemeProvider } from "../../context/ThemeContext.jsx";
-import { AuthContext } from "../../context/AuthContext.jsx";
+import authReducer from "../../store/slices/authSlice";
 import Login from "../Login.jsx";
+import { authService } from "../../services/authService";
 
-function renderLogin({ login = vi.fn() } = {}) {
+vi.mock("../../services/authService", () => ({
+  authService: {
+    login: vi.fn(),
+  },
+}));
+
+function renderLogin() {
+  const store = configureStore({
+    reducer: {
+      auth: authReducer,
+    },
+  });
+
   return render(
-    <MemoryRouter>
-      <ThemeProvider>
-        <AuthContext.Provider
-          value={{
-            user: null,
-            login,
-            logout: vi.fn(),
-            isAuthenticated: false,
-            loading: false,
-            isAdmin: false,
-          }}
-        >
+    <Provider store={store}>
+      <MemoryRouter>
+        <ThemeProvider>
           <Login />
-        </AuthContext.Provider>
-      </ThemeProvider>
-    </MemoryRouter>,
+        </ThemeProvider>
+      </MemoryRouter>
+    </Provider>,
   );
 }
 
 describe("Login", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("envía el formulario con email y pass", async () => {
-    const login = vi.fn().mockResolvedValue({ email: "test@correo.com" });
+    authService.login.mockResolvedValue({
+      usuario: { email: "test@correo.com" },
+      token: "abc123",
+    });
     const user = userEvent.setup();
 
-    renderLogin({ login });
+    renderLogin();
 
     await user.type(
       screen.getByPlaceholderText("ejemplo@correo.com"),
@@ -41,20 +54,22 @@ describe("Login", () => {
     await user.type(screen.getByPlaceholderText("*********"), "password123");
     await user.click(screen.getByRole("button", { name: "Iniciar" }));
 
-    expect(login).toHaveBeenCalledWith("test@correo.com", "password123");
+    expect(authService.login).toHaveBeenCalledWith({
+      email: "test@correo.com",
+      password: "password123",
+    });
   });
 
   it("envía el formulario con con los campos vacíos", async () => {
-    const login = vi.fn();
     const user = userEvent.setup();
 
-    renderLogin({ login });
+    renderLogin();
 
     await user.click(screen.getByRole("button", { name: "Iniciar" }));
 
     expect(
       await screen.findByText("Por favor, complete los campos obligatorios"),
     ).toBeInTheDocument();
-    expect(login).not.toHaveBeenCalled();
+    expect(authService.login).not.toHaveBeenCalled();
   });
 });

@@ -1,48 +1,50 @@
-import { useContext, useState } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import Input from "../components/inputs/Input";
 import PasswordInput from "../components/inputs/PasswordInput";
 import { Button } from "../components/buttons/Buttons";
 import NavBar from "../components/NavBar";
+import {
+  clearAuthError,
+  login,
+  selectAuthError,
+  selectAuthLoading,
+} from "../store/slices/authSlice";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
+  const [localError, setLocalError] = useState(null);
 
-  const [load, setLoad] = useState(false);
-  const [error, setError] = useState(null);
-
-  const { login } = useContext(AuthContext);
+  const dispatch = useDispatch();
+  const loading = useSelector(selectAuthLoading);
+  const authError = useSelector(selectAuthError);
 
   const navigate = useNavigate();
   const location = useLocation();
 
   const from = location.state?.from?.pathname || "/";
+  const error = localError || authError;
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError("");
-    setLoad(true);
+    setLocalError(null);
+    dispatch(clearAuthError());
 
     if (!email || !pass) {
-      setError("Por favor, complete los campos obligatorios");
-      setLoad(false);
+      setLocalError("Por favor, complete los campos obligatorios");
       return;
     }
-    try {
-      await login(email, pass);
+
+    const result = await dispatch(login({ email, password: pass }));
+    if (login.fulfilled.match(result)) {
       navigate(from, { replace: true });
-    } catch (err) {
-      const mensaje =
-        err.response?.data?.error ||
-        err.response?.data?.mensaje ||
-        err.message;
-      setError(`Error al iniciar sesión: ${mensaje}`);
-    } finally {
-      setLoad(false);
+    } else {
+      setLocalError(`Error al iniciar sesión: ${result.payload}`);
     }
   }
+
   return (
     <>
       <NavBar />
@@ -74,7 +76,7 @@ function Login() {
               onChangePass={(e) => setPass(e.target.value)}
               error={error}
             />
-            <Button type="submit">{load ? "...Loading" : "Iniciar"}</Button>
+            <Button type="submit">{loading ? "...Loading" : "Iniciar"}</Button>
           </form>
 
           <p className="text-app-muted text-sm text-center">

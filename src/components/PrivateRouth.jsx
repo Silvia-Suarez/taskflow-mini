@@ -1,16 +1,10 @@
-import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { useSelector } from "react-redux";
 import { Navigate, useLocation } from "react-router-dom";
+import { selectIsAuthenticated } from "../store/slices/authSlice";
 
 function PrivateRoute({ children }) {
-  const { isAuthenticated, loading } = useContext(AuthContext);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const location = useLocation();
-
-  if (loading) {
-    return (
-      <p className="text-center text-app-muted py-10">Cargando sesión...</p>
-    );
-  }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;

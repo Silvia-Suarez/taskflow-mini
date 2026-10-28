@@ -1,4 +1,5 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import ButtonTheme from "../components/buttons/ButtonTheme";
 import {
   PiHouse,
@@ -9,12 +10,14 @@ import {
   PiUserCircleGearThin,
   PiBroadcast,
 } from "react-icons/pi";
-import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import {
+  logout,
+  selectIsAuthenticated,
+} from "../store/slices/authSlice";
 
 function Navegacion() {
-  const { isAuthenticated, logout } = useContext(AuthContext);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const links = [
     { to: "/", label: "Inicio", icon: <PiHouse className="text-xl" /> },
@@ -51,7 +54,7 @@ function Navegacion() {
 
   function handleLogout() {
     if (window.confirm("¿Estás seguro de querer cerrar sesión?")) {
-      logout();
+      dispatch(logout());
       navigate("/login");
     }
   }

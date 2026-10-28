@@ -1,11 +1,12 @@
 import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { useSelector } from "react-redux";
 import { SocketContext } from "../context/SocketContext";
 import NavBar from "../components/NavBar";
 import Card from "../components/Card";
 import Input from "../components/inputs/Input";
 import { Button } from "../components/buttons/Buttons";
 import LiveChat from "../components/live/LiveChat";
+import { selectUser } from "../store/slices/authSlice";
 
 /**
  * Socket contract (backend should match):
@@ -16,7 +17,7 @@ import LiveChat from "../components/live/LiveChat";
  */
 function Live() {
   const { socket, conectado } = useContext(SocketContext);
-  const { user } = useContext(AuthContext);
+  const user = useSelector(selectUser);
   const [nombre, setNombre] = useState(
     () => sessionStorage.getItem("nombreLive") || "",
   );

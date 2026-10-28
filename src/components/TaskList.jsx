@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import {
   PiPlusCircleLight,
@@ -13,82 +14,72 @@ import Card from "./Card";
 import { Button, ErrorButton, NeutralButton } from "./buttons/Buttons";
 import Input from "./inputs/Input";
 import SearchInput from "./inputs/SearchInput";
-import { cargarTareas, setTareas } from "../store/slices/tareasSlice";
+import {
+  cargarTareas,
+  crearTarea,
+  eliminarTarea,
+  eliminarTodas,
+  selectTareas,
+  selectTareasError,
+  selectTareasLoading,
+  toggleCompletada,
+} from "../store/slices/tareasSlice";
+
+function taskId(tarea) {
+  return tarea._id || tarea.id;
+}
+
+function taskTitle(tarea) {
+  return tarea.title || tarea.text || "";
+}
 
 function TaskList() {
-  // // Estado: lista de tareas
-  // const [tareas, setTareas] = useState([]);
-  // // Manejo de estados
-  // const [loading, setLoading] = useState(true);
-  // const [error, setError] = useState(null);
-
-  const tareas = useSelector((state = state.tareas.items));
-  const loading = useSelector((state = state.tareas.loading));
-  const error = useSelector((state = state.tareas.error));
-
-  // Dispatcher
+  const tareas = useSelector(selectTareas);
+  const loading = useSelector(selectTareasLoading);
+  const error = useSelector(selectTareasError);
   const dispatch = useDispatch();
 
-  // Estado: valor del input
   const [nuevaTarea, setNuevaTarea] = useState("");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     dispatch(cargarTareas());
   }, [dispatch]);
 
-  // HAGAMOS EL EJEMPLO DE BUSCAR TAREAS CON UN SEARCH BAR
-  const [search, setSearch] = useState("");
   const filteredTareas = tareas
-    .filter((tarea) => tarea.title.toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) => b.id - a.id) // Ordenar por id de manera descendente
-    .sort((a, b) => a.completed - b.completed); // Ordenar por completed de manera ascendente
+    .filter((tarea) =>
+      taskTitle(tarea).toLowerCase().includes(search.toLowerCase()),
+    )
+    .slice()
+    .sort((a, b) => Number(a.completed) - Number(b.completed));
 
-  useEffect(() => {
-    const guardadas = localStorage.getItem("tareas");
-    if (guardadas) {
-      setTimeout(() => {
-        setTareas(JSON.parse(guardadas));
-        setLoading(false);
-      }, 5000);
-    } else {
-      setTimeout(() => {
-        cargarTareas();
-      }, 5000);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (tareas.length > 0) {
-      localStorage.setItem("tareas", JSON.stringify(tareas));
-    }
-  }, [tareas]);
-
-  // Función para agregar tarea
   function handleAgregarTarea(e) {
     e.preventDefault();
     if (nuevaTarea.trim() === "") return;
-    dispatch(crearTarea({ nuevaTarea }));
+    dispatch(crearTarea(nuevaTarea.trim()));
     setNuevaTarea("");
   }
-  // Función para intentar nuevamente desde la API
-  async function tryAgainFromApi() {
-    await cargarTareas();
+
+  function tryAgainFromApi() {
+    dispatch(cargarTareas());
   }
-  // Función para eliminar todas las tareas
-  function eliminarTodas() {
+
+  function handleEliminarTodas() {
     if (confirm("¿Eliminar todas las tareas?")) {
-      setTareas([]);
-      localStorage.removeItem("tareas");
+      dispatch(eliminarTodas());
     }
   }
-  // Función para eliminar tarea
-  function eliminarTarea(id) {
-    dispatch(eliminarTarea({ _id: id }));
+
+  function handleEliminarTarea(id) {
+    dispatch(eliminarTarea(id));
   }
-  // Función para alternar completada
-  function toggleCompletada(id) {
-    setTareas(
-      tareas.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)),
+
+  function handleToggleCompletada(tarea) {
+    dispatch(
+      toggleCompletada({
+        id: taskId(tarea),
+        completed: !!tarea.completed,
+      }),
     );
   }
 
@@ -120,14 +111,6 @@ function TaskList() {
         onSubmit={handleAgregarTarea}
         className="flex items-center gap-2 my-4"
       >
-        {/* <input
-          name="nuevaTarea"
-          type="text"
-          value={nuevaTarea}
-          className="w-auto rounded-input p-4  bg-white border border-b-gray-200"
-          onChange={(e) => setNuevaTarea(e.target.value)}
-          placeholder="Nueva tarea..."
-        /> */}
         <Input
           type="text"
           placeholder="Nueva tarea..."
@@ -144,7 +127,7 @@ function TaskList() {
           disabled={loading}
           icon={PiArrowClockwiseLight}
         ></NeutralButton>
-        <ErrorButton onClick={eliminarTodas} icon={PiTrashLight}>
+        <ErrorButton onClick={handleEliminarTodas} icon={PiTrashLight}>
           Eliminar todas
         </ErrorButton>
       </div>
@@ -154,11 +137,11 @@ function TaskList() {
         ) : (
           filteredTareas.map((tarea) => (
             <li
-              key={tarea.id}
+              key={taskId(tarea)}
               className="flex items-center gap-3 p-3 bg-app-bg rounded-card border border-app-border transition-colors duration-200"
             >
               <button
-                onClick={() => toggleCompletada(tarea.id)}
+                onClick={() => handleToggleCompletada(tarea)}
                 className="text-2xl cursor-pointer hover:scale-110 transition-transform"
                 aria-label={
                   tarea.completed
@@ -175,17 +158,17 @@ function TaskList() {
               <span
                 className={`flex-1 text-app-text ${tarea.completed ? "line-through text-app-muted" : ""}`}
               >
-                {tarea.title}
+                {taskTitle(tarea)}
               </span>
               <div className="flex gap-2">
                 <Link
-                  to={`/task/${tarea.id}`}
+                  to={`/task/${taskId(tarea)}`}
                   className="bg-purple-accent hover:bg-purple-600 text-white px-3 py-1 rounded-button text-sm transition-colors duration-200 flex items-center gap-1"
                 >
                   <PiEyeLight className="text-xs" /> Ver
                 </Link>
                 <button
-                  onClick={() => eliminarTarea(tarea.id)}
+                  onClick={() => handleEliminarTarea(taskId(tarea))}
                   className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-button text-sm transition-colors duration-200 flex items-center gap-1"
                 >
                   <PiTrashLight className="text-xs" />

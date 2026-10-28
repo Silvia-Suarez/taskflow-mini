@@ -1,47 +1,63 @@
 import { useParams, Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import NavBar from "../components/NavBar";
 import Card from "../components/Card";
 import Badge from "../components/Badge";
 import { PiArrowLeftLight } from "react-icons/pi";
+import { selectTareaById } from "../store/slices/tareasSlice";
+import { tareasService } from "../services/tareasService";
 
 function TaskDetail() {
   const { id } = useParams();
-  const [tarea, setTarea] = useState(null);
-  const [cargando, setCargando] = useState(true);
+  const tareaFromStore = useSelector(selectTareaById(id));
+  const [tarea, setTarea] = useState(tareaFromStore || null);
+  const [cargando, setCargando] = useState(!tareaFromStore);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (tareaFromStore) {
+      setTarea(tareaFromStore);
+      setCargando(false);
+      setError(null);
+      return;
+    }
+
+    let cancelled = false;
+
     async function cargarTarea() {
       try {
         setCargando(true);
         setError(null);
-
-        // Custom tasks (Date.now ids) live in localStorage, not JSONPlaceholder
-        const guardadas = localStorage.getItem("tareas");
-        if (guardadas) {
-          const lista = JSON.parse(guardadas);
-          const local = lista.find((t) => String(t.id) === String(id));
-          if (local) {
-            setTarea(local);
-            return;
-          }
+        const data = await tareasService.getTareaById(id);
+        if (!cancelled) {
+          setTarea(data);
         }
-
-        const response = await fetch(
-          `https://jsonplaceholder.typicode.com/todos/${id}`,
-        );
-        if (!response.ok) throw new Error("Tarea no encontrada");
-        const data = await response.json();
-        setTarea(data);
       } catch (err) {
-        setError(err.message);
+        if (!cancelled) {
+          setError(
+            err.response?.data?.error ||
+              err.response?.data?.mensaje ||
+              err.message ||
+              "Tarea no encontrada",
+          );
+        }
       } finally {
-        setCargando(false);
+        if (!cancelled) {
+          setCargando(false);
+        }
       }
     }
+
     cargarTarea();
-  }, [id]);
+    return () => {
+      cancelled = true;
+    };
+  }, [id, tareaFromStore]);
+
+  const titulo = tarea?.title || tarea?.text;
+  const tareaId = tarea?._id || tarea?.id;
+  const userId = tarea?.userId || tarea?.usuario;
 
   return (
     <div className="min-h-screen bg-app-bg transition-colors duration-300">
@@ -67,13 +83,11 @@ function TaskDetail() {
           )}
           {tarea && (
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-app-text">
-                {tarea.title}
-              </h2>
+              <h2 className="text-2xl font-bold text-app-text">{titulo}</h2>
               <div className="space-y-2 text-app-muted">
                 <p>
                   <span className="font-semibold text-app-text">ID:</span>{" "}
-                  {tarea.id}
+                  {tareaId}
                 </p>
                 <p>
                   <span className="font-semibold text-app-text">Estado:</span>{" "}
@@ -81,12 +95,12 @@ function TaskDetail() {
                     {tarea.completed ? "Completada" : "Pendiente"}
                   </Badge>
                 </p>
-                {tarea.userId != null && (
+                {userId != null && (
                   <p>
                     <span className="font-semibold text-app-text">
                       Usuario:
                     </span>{" "}
-                    {tarea.userId}
+                    {String(userId)}
                   </p>
                 )}
               </div>
