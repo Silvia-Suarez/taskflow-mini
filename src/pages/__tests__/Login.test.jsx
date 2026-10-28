@@ -2,6 +2,9 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { vi } from "vitest";
+import { ThemeProvider } from "../../context/ThemeContext.jsx";
+import { AuthContext } from "../../context/AuthContext.jsx";
+import Login from "../Login.jsx";
 
 function renderLogin({ login = vi.fn() } = {}) {
   return render(

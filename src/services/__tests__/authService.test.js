@@ -1,4 +1,4 @@
-import authService from "../authService";
+import { authService } from "../authService";
 import api from "../api";
 
 vi.mock("../api", () => ({
