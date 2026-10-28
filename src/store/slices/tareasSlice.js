@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from "@redux/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { tareasService } from "../../services/tareasService";
 
 // Thunk: cargar tareas desde el backend
